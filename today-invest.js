@@ -1,4 +1,5 @@
 import { emergencyQuizData, fallbackQuizData, quizTypes } from "./data/todayQuizData.js";
+import { normalizeSchoolName, schoolStats } from "./data/universityRankings.js";
 
 const STORAGE_KEYS = {
   battle: "todayBattleChoice",
@@ -16,6 +17,8 @@ const STORAGE_KEYS = {
   adminQuiz: "todayQuizAdminData",
   points: "todayInvestPoints",
   startAt: "todayInvestStartedAt",
+  memberSchool: "memberSchool",
+  customSchools: "customSchoolStats",
 };
 
 const app = document.querySelector("#app");
@@ -29,16 +32,10 @@ const state = {
   matchStep: 0,
   matchIndex: 0,
   interestedStocks: readJSON(STORAGE_KEYS.stocks, []),
+  showAllSchools: false,
 };
 
 const flowCards = ["⚔️ 오늘의 배틀", "🎯 오늘의 퀴즈", "🚀 오늘의 떡상픽", "🏆 대학 랭킹"];
-const currentUser = { university: "이화여대" };
-const rankings = [
-  { school: "서울대", points: 12540 },
-  { school: "연세대", points: 11830 },
-  { school: "고려대", points: 10920 },
-  { school: "이화여대", points: 9870, today: 32 },
-];
 const matches = [
   {
     score: 92,
@@ -118,6 +115,57 @@ function addPoints(points) {
   save(STORAGE_KEYS.points, current + points);
 }
 
+function getMemberSchool() {
+  return normalizeSchoolName(localStorage.getItem(STORAGE_KEYS.memberSchool) || "이화여자대학교");
+}
+
+function saveMemberSchool(value) {
+  const school = normalizeSchoolName(value);
+  if (!school) return "";
+  save(STORAGE_KEYS.memberSchool, school);
+  ensureSchoolStat(school);
+  return school;
+}
+
+function ensureSchoolStat(school) {
+  if (schoolStats.some((item) => item.school === school)) return;
+  const customSchools = readJSON(STORAGE_KEYS.customSchools, []);
+  if (customSchools.some((item) => item.school === school)) return;
+  customSchools.push({
+    school,
+    totalPoints: 120,
+    memberCount: 1,
+    todayParticipants: 1,
+    totalParticipations: 1,
+    lastActiveAt: new Date().toISOString(),
+    weeklyPointGrowth: 120,
+    rankChange: 0,
+    custom: true,
+  });
+  save(STORAGE_KEYS.customSchools, customSchools);
+}
+
+function getRankedSchools() {
+  const merged = [...schoolStats, ...readJSON(STORAGE_KEYS.customSchools, [])];
+  return merged
+    .map((item) => ({ ...item, school: normalizeSchoolName(item.school) }))
+    .sort((a, b) => b.totalPoints - a.totalPoints);
+}
+
+function getRisingSchools() {
+  return [...getRankedSchools()]
+    .sort((a, b) => {
+      const aScore = a.weeklyPointGrowth + a.todayParticipants * 45 + Math.max(0, a.memberCount) * 4;
+      const bScore = b.weeklyPointGrowth + b.todayParticipants * 45 + Math.max(0, b.memberCount) * 4;
+      return bScore - aScore;
+    })
+    .slice(0, 3);
+}
+
+function rankOfSchool(school, rankedSchools) {
+  return rankedSchools.findIndex((item) => item.school === school) + 1;
+}
+
 async function getTodayQuiz() {
   try {
     const response = await fetch("/api/today-quiz", { headers: { accept: "application/json" } });
@@ -149,8 +197,8 @@ function formatUpdatedAt(value) {
   }).format(date);
 }
 
-function screen(content) {
-  app.innerHTML = `<main class="app-shell"><section class="screen">${content}</section></main>`;
+function screen(content, className = "") {
+  app.innerHTML = `<main class="app-shell"><section class="screen ${className}">${content}</section></main>`;
 }
 
 function topbar(progress = `${completedCount()} / 4`) {
@@ -300,29 +348,73 @@ function renderPick() {
 }
 
 function renderRanking() {
+  const rankedSchools = getRankedSchools();
+  const memberSchool = getMemberSchool();
+  ensureSchoolStat(memberSchool);
+  const currentRank = rankOfSchool(memberSchool, rankedSchools);
+  const currentSchool = rankedSchools.find((item) => item.school === memberSchool);
+  const topSchools = state.showAllSchools ? rankedSchools : rankedSchools.slice(0, 10);
+  const shouldShowCurrent = currentSchool && currentRank > 10 && !state.showAllSchools;
+  const risingSchools = getRisingSchools();
   screen(`
     ${topbar("3 / 4")}
     <div class="hero">
       <div class="eyebrow">대학 랭킹</div>
-      <h2>오늘 학교 기여도</h2>
+      <h2>TOP 10 학교 투자 랭킹</h2>
     </div>
-    <div class="ranking-list">
-      ${rankings.map((rank, index) => `
-        <div class="ranking-card ${rank.school === currentUser.university ? "current" : ""}">
+    <form class="school-form" data-form="member-school">
+      <input class="text-input school-input" name="school" value="${escapeAttribute(memberSchool)}" placeholder="내 학교 입력" />
+      <button class="secondary-button school-save">저장</button>
+    </form>
+    <div class="ranking-list compact-rankings">
+      ${topSchools.map((rank) => {
+        const realRank = rankOfSchool(rank.school, rankedSchools);
+        return `
+        <div class="ranking-card ${rank.school === memberSchool ? "current" : ""} ${realRank <= 3 ? "podium" : ""}">
           <div>
-            <div class="rank-title">${index + 1}위 ${rank.school}</div>
-            ${rank.today ? `<div class="muted">${rank.school} 현재 ${index + 1}위, 오늘 +${rank.today}P</div>` : ""}
+            <div class="rank-title">${realRank}위 ${rank.school}</div>
+            ${rank.school === memberSchool ? `<div class="muted">내 학교, 오늘 참여자 ${rank.todayParticipants}명</div>` : ""}
           </div>
-          <div class="rank-points">${rank.points.toLocaleString()}P</div>
+          <div class="rank-points">${rank.totalPoints.toLocaleString()}P</div>
+        </div>
+      `}).join("")}
+      ${shouldShowCurrent ? `
+        <div class="ranking-card current pinned-school">
+          <div>
+            <div class="rank-title">${currentRank}위 ${currentSchool.school}</div>
+            <div class="muted">내 학교는 TOP 10 밖이어도 표시됩니다</div>
+          </div>
+          <div class="rank-points">${currentSchool.totalPoints.toLocaleString()}P</div>
+        </div>
+      ` : ""}
+    </div>
+    <button class="footer-link" data-action="toggle-schools">${state.showAllSchools ? "TOP 10만 보기" : "전체 학교 보기"}</button>
+    <div class="rising-section">
+      <div class="section-title">🔥 이번 주 급상승</div>
+      ${risingSchools.map((school) => `
+        <div class="rising-row">
+          <strong>+${school.rankChange}위</strong>
+          <span>${school.school}</span>
+          <em>+${school.weeklyPointGrowth.toLocaleString()}P</em>
         </div>
       `).join("")}
     </div>
     <button class="primary-button" data-action="finish">완료하기</button>
-  `);
+  `, "ranking-screen");
   window.setTimeout(() => {
     const button = document.querySelector("[data-action='finish']");
     if (button) button.style.opacity = "1";
   }, 1200);
+  bind("[data-form='member-school']", (event) => {
+    event.preventDefault();
+    const school = new FormData(event.currentTarget).get("school");
+    saveMemberSchool(school);
+    renderRanking();
+  }, "submit");
+  bind("[data-action='toggle-schools']", () => {
+    state.showAllSchools = !state.showAllSchools;
+    renderRanking();
+  });
   bind("[data-action='finish']", () => {
     save(STORAGE_KEYS.rankingViewed, "true");
     addPoints(2);
@@ -490,6 +582,7 @@ function renderMatchResult() {
 
 function renderAdmin() {
   const quiz = readJSON(STORAGE_KEYS.adminQuiz, fallbackQuizData);
+  const rankedSchools = getRankedSchools();
   screen(`
     ${topbar("Admin")}
     <div class="hero">
@@ -511,6 +604,24 @@ function renderAdmin() {
       <input class="admin-input" name="updatedAt" value="${escapeAttribute(new Date().toISOString())}" placeholder="updatedAt" />
       <button class="primary-button">저장</button>
     </form>
+    <div class="admin-panel admin-ranking">
+      <h3>전체 학교 랭킹</h3>
+      ${rankedSchools.map((school, index) => `
+        <div class="admin-school-row">
+          <div>
+            <strong>${index + 1}위 ${school.school}</strong>
+            ${school.custom ? `<span class="custom-badge">신규 학교</span>` : ""}
+            <span>최근 ${formatUpdatedAt(school.lastActiveAt)}</span>
+          </div>
+          <dl>
+            <dt>회원</dt><dd>${school.memberCount}명</dd>
+            <dt>총점</dt><dd>${school.totalPoints.toLocaleString()}P</dd>
+            <dt>오늘</dt><dd>${school.todayParticipants}명</dd>
+            <dt>누적</dt><dd>${school.totalParticipations}회</dd>
+          </dl>
+        </div>
+      `).join("")}
+    </div>
     <button class="secondary-button" data-action="today">TODAY INVEST로</button>
   `);
   bind("[data-form='admin-quiz']", (event) => {

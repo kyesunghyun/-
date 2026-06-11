@@ -1,6 +1,6 @@
 :root {
-  color: #10131a;
-  background: #f6f8fc;
+  color: #fff;
+  background: #050505;
   font-family:
     Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -13,9 +13,8 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 14% -10%, rgba(47, 111, 237, 0.18), transparent 32%),
-    radial-gradient(circle at 86% 0%, rgba(220, 170, 54, 0.2), transparent 30%),
-    linear-gradient(180deg, #ffffff 0%, #f6f8fc 48%, #eef3fb 100%);
+    radial-gradient(circle at 50% -20%, rgba(148, 93, 255, 0.26), transparent 38%),
+    linear-gradient(180deg, #0b0b0f 0%, #050505 42%, #050505 100%);
 }
 
 button,
@@ -54,7 +53,7 @@ button {
 }
 
 .brand {
-  color: rgba(16, 19, 26, 0.6);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -62,10 +61,10 @@ button {
 
 .progress-pill,
 .mini-pill {
-  border: 1px solid rgba(28, 45, 72, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  color: rgba(16, 19, 26, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 12px;
   font-weight: 800;
   padding: 8px 11px;
@@ -77,7 +76,7 @@ button {
 }
 
 .eyebrow {
-  color: #2f6fed;
+  color: #d8bc72;
   font-size: 12px;
   font-weight: 900;
 }
@@ -100,7 +99,7 @@ h2 {
 
 .subtitle,
 .muted {
-  color: rgba(16, 19, 26, 0.58);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .subtitle {
@@ -124,10 +123,10 @@ h2 {
 .match-card,
 .admin-panel,
 .notice-card {
-  border: 1px solid rgba(28, 45, 72, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18px 54px rgba(32, 52, 89, 0.11);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.28);
 }
 
 .feature-card {
@@ -141,15 +140,15 @@ h2 {
 }
 
 .feature-card.done {
-  border-color: rgba(220, 170, 54, 0.38);
-  background: rgba(255, 248, 229, 0.94);
+  border-color: rgba(216, 188, 114, 0.42);
+  background: rgba(216, 188, 114, 0.1);
 }
 
 .option-button {
   width: 100%;
   min-height: 62px;
   padding: 16px 18px;
-  color: #10131a;
+  color: #fff;
   text-align: left;
   font-size: 18px;
   font-weight: 900;
@@ -168,9 +167,9 @@ h2 {
 }
 
 .option-button.selected {
-  border-color: rgba(47, 111, 237, 0.62);
-  background: rgba(232, 240, 255, 0.98);
-  box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.1), 0 18px 44px rgba(47, 111, 237, 0.16);
+  border-color: rgba(168, 124, 255, 0.9);
+  background: rgba(168, 124, 255, 0.18);
+  box-shadow: 0 0 28px rgba(168, 124, 255, 0.24);
 }
 
 .option-button.compact {
@@ -199,27 +198,27 @@ h2 {
 }
 
 .primary-button {
-  color: #fff;
-  background: linear-gradient(135deg, #2f6fed, #1bbf83);
-  box-shadow: 0 16px 38px rgba(47, 111, 237, 0.22);
+  color: #09080c;
+  background: linear-gradient(135deg, #d8bc72, #a87cff);
+  box-shadow: 0 16px 44px rgba(168, 124, 255, 0.24);
 }
 
 .secondary-button {
-  color: #10131a;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(28, 45, 72, 0.12);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .icon-button {
   min-height: 40px;
   border-radius: 999px;
-  color: #10131a;
-  background: rgba(255, 255, 255, 0.86);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .feedback {
   min-height: 28px;
-  color: #2f6fed;
+  color: #d8bc72;
   font-weight: 950;
   text-align: center;
   opacity: 0;
@@ -243,10 +242,10 @@ h2 {
 .admin-input,
 .admin-textarea {
   width: 100%;
-  border: 1px solid rgba(28, 45, 72, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #10131a;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   outline: 0;
 }
 
@@ -265,9 +264,46 @@ h2 {
   gap: 10px;
 }
 
+.ranking-screen {
+  gap: 10px;
+}
+
+.school-form {
+  display: grid;
+  grid-template-columns: 1fr 84px;
+  gap: 8px;
+}
+
+.school-input {
+  min-height: 48px;
+}
+
+.school-save {
+  min-height: 48px;
+  border-radius: 18px;
+}
+
+.compact-rankings {
+  gap: 7px;
+}
+
+.compact-rankings .ranking-card {
+  min-height: 48px;
+  padding: 10px 12px;
+}
+
+.ranking-card.podium {
+  border-color: rgba(168, 124, 255, 0.44);
+  background: linear-gradient(135deg, rgba(168, 124, 255, 0.18), rgba(216, 188, 114, 0.1));
+}
+
 .ranking-card.current {
-  border-color: rgba(220, 170, 54, 0.58);
-  background: rgba(255, 248, 229, 0.96);
+  border-color: rgba(216, 188, 114, 0.72);
+  background: rgba(216, 188, 114, 0.13);
+}
+
+.pinned-school {
+  box-shadow: 0 0 0 3px rgba(216, 188, 114, 0.12), 0 18px 70px rgba(0, 0, 0, 0.28);
 }
 
 .rank-title {
@@ -276,14 +312,45 @@ h2 {
 }
 
 .rank-points {
-  color: #b87b08;
+  color: #d8bc72;
   font-size: 14px;
+  font-weight: 950;
+}
+
+.rising-section {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.section-title {
+  color: #d8bc72;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.rising-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+}
+
+.rising-row strong,
+.rising-row em {
+  color: #fff;
+  font-style: normal;
   font-weight: 950;
 }
 
 .notice-card {
   padding: 14px;
-  color: rgba(16, 19, 26, 0.68);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 14px;
   line-height: 1.4;
 }
@@ -297,13 +364,13 @@ h2 {
 }
 
 .stat-label {
-  color: rgba(16, 19, 26, 0.54);
+  color: rgba(255, 255, 255, 0.56);
   font-size: 12px;
 }
 
 .stat-value {
   margin-top: 6px;
-  color: #10131a;
+  color: #fff;
   font-size: 20px;
   font-weight: 950;
 }
@@ -318,8 +385,8 @@ h2 {
   width: fit-content;
   border-radius: 999px;
   padding: 8px 11px;
-  background: rgba(47, 111, 237, 0.1);
-  color: #2f6fed;
+  background: rgba(216, 188, 114, 0.16);
+  color: #d8bc72;
   font-weight: 950;
 }
 
@@ -327,24 +394,24 @@ h2 {
   display: flex;
   justify-content: space-between;
   gap: 14px;
-  color: rgba(16, 19, 26, 0.64);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 14px;
 }
 
 .match-line strong {
-  color: #10131a;
+  color: #fff;
 }
 
 .quiz-meta {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  color: rgba(16, 19, 26, 0.48);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 11px;
 }
 
 .stale {
-  color: #b87b08;
+  color: #d8bc72;
   font-weight: 900;
 }
 
@@ -357,6 +424,61 @@ h2 {
 .admin-panel h3 {
   margin: 0;
   font-size: 15px;
+}
+
+.admin-ranking {
+  max-height: 42svh;
+  overflow: auto;
+}
+
+.admin-school-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 11px 0;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-school-row:first-of-type {
+  border-top: 0;
+}
+
+.admin-school-row strong {
+  display: block;
+  font-size: 14px;
+}
+
+.admin-school-row span {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 11px;
+}
+
+.admin-school-row dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.admin-school-row dt {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+}
+
+.admin-school-row dd {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.custom-badge {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 4px;
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: rgba(168, 124, 255, 0.18);
+  color: #d8bc72 !important;
+  font-weight: 900;
 }
 
 .admin-input,
@@ -374,7 +496,7 @@ h2 {
   align-self: center;
   border: 0;
   background: transparent;
-  color: rgba(16, 19, 26, 0.48);
+  color: rgba(255, 255, 255, 0.48);
   font-size: 12px;
   text-decoration: underline;
 }
