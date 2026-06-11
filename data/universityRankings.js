@@ -57,7 +57,7 @@ export function normalizeSchoolName(value = "") {
   return schoolAliases[compact] || compact;
 }
 
-const schools = [
+export const registeredSchools = [
   "서울대학교",
   "연세대학교",
   "고려대학교",
@@ -99,13 +99,13 @@ const schools = [
   "제주대학교",
 ];
 
-export const schoolStats = schools.map((school, index) => ({
+export const schoolStats = registeredSchools.map((school) => ({
   school,
-  totalPoints: Math.max(1840, 12540 - index * 247 + (index % 4) * 64),
-  memberCount: Math.max(7, 68 - index + (index % 5)),
-  todayParticipants: Math.max(1, 18 - Math.floor(index / 3) + (index % 3)),
-  totalParticipations: Math.max(18, 240 - index * 4 + (index % 6) * 3),
-  lastActiveAt: new Date(Date.UTC(2026, 5, 12, 0, 30 - index * 7)).toISOString(),
-  weeklyPointGrowth: Math.max(140, 960 - index * 17 + (index % 7) * 42),
-  rankChange: index === 14 ? 3 : index === 15 ? 2 : index === 26 ? 2 : Math.max(0, 3 - (index % 5)),
+  totalPoints: 0,
+  memberCount: 0,
+  todayParticipants: 0,
+  totalParticipations: 0,
+  lastActiveAt: "",
+  weeklyPointGrowth: 0,
+  rankChange: 0,
 }));

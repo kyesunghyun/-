@@ -1,6 +1,6 @@
 :root {
-  color: #fff;
-  background: #0f1117;
+  color: #261f3b;
+  background: #fff8fb;
   font-family:
     Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -13,9 +13,10 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 22% -12%, rgba(151, 92, 255, 0.32), transparent 34%),
-    radial-gradient(circle at 84% 8%, rgba(39, 224, 178, 0.18), transparent 28%),
-    linear-gradient(180deg, #151927 0%, #0f1117 46%, #0f1117 100%);
+    radial-gradient(circle at 18% -8%, rgba(255, 209, 102, 0.38), transparent 30%),
+    radial-gradient(circle at 86% 4%, rgba(39, 224, 178, 0.22), transparent 28%),
+    radial-gradient(circle at 50% 104%, rgba(151, 92, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, #fffdf7 0%, #fff8fb 48%, #f2fbff 100%);
   overflow-x: hidden;
 }
 
@@ -57,7 +58,7 @@ button {
 }
 
 .brand {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(38, 31, 59, 0.6);
   font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.08em;
@@ -65,17 +66,17 @@ button {
 
 .hunter-level {
   margin-top: 3px;
-  color: #27e0b2;
+  color: #7b4dff;
   font-size: 12px;
   font-weight: 950;
 }
 
 .progress-pill,
 .mini-pill {
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(123, 77, 255, 0.12);
   border-radius: 999px;
-  background: #171b24;
-  color: rgba(255, 255, 255, 0.82);
+  background: #ffffff;
+  color: rgba(38, 31, 59, 0.72);
   font-size: 12px;
   font-weight: 800;
   padding: 8px 11px;
@@ -84,11 +85,11 @@ button {
 .sound-toggle {
   width: 38px;
   height: 38px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  background: #171b24;
-  color: #fff;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  border: 2px solid rgba(123, 77, 255, 0.12);
+  border-radius: 16px;
+  background: #ffffff;
+  color: #261f3b;
+  box-shadow: 0 10px 24px rgba(123, 77, 255, 0.1);
 }
 
 .hero {
@@ -97,7 +98,7 @@ button {
 }
 
 .eyebrow {
-  color: #27e0b2;
+  color: #7b4dff;
   font-size: 12px;
   font-weight: 900;
 }
@@ -111,7 +112,7 @@ h2 {
 h1 {
   font-size: clamp(38px, 12vw, 56px);
   line-height: 0.94;
-  text-shadow: 0 4px 0 rgba(151, 92, 255, 0.32);
+  text-shadow: 0 4px 0 rgba(255, 209, 102, 0.52);
 }
 
 h2 {
@@ -121,7 +122,7 @@ h2 {
 
 .subtitle,
 .muted {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(38, 31, 59, 0.58);
 }
 
 .subtitle {
@@ -145,10 +146,10 @@ h2 {
 .match-card,
 .admin-panel,
 .notice-card {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  background: #171b24;
-  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(123, 77, 255, 0.1);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 44px rgba(123, 77, 255, 0.12), inset 0 -4px 0 rgba(123, 77, 255, 0.04);
   animation: cardIn 280ms ease both;
 }
 
@@ -165,8 +166,8 @@ h2 {
 }
 
 .feature-card.done {
-  border-color: rgba(255, 209, 102, 0.5);
-  background: linear-gradient(135deg, rgba(255, 209, 102, 0.16), rgba(151, 92, 255, 0.12));
+  border-color: rgba(255, 209, 102, 0.8);
+  background: linear-gradient(135deg, rgba(255, 246, 204, 0.98), rgba(237, 229, 255, 0.96));
 }
 
 .quest-blocks {
@@ -177,9 +178,9 @@ h2 {
 .quest-blocks span {
   width: 30px;
   height: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(123, 77, 255, 0.16);
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(123, 77, 255, 0.08);
 }
 
 .quest-blocks span.filled {
@@ -188,13 +189,13 @@ h2 {
 }
 
 .level-card {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  background: #171b24;
+  border: 2px solid rgba(123, 77, 255, 0.1);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.94);
   padding: 14px;
   display: grid;
   gap: 10px;
-  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 18px 44px rgba(123, 77, 255, 0.12);
 }
 
 .level-card div:first-child {
@@ -205,13 +206,13 @@ h2 {
 }
 
 .level-card strong {
-  color: #ffd166;
+  color: #7b4dff;
   font-size: 18px;
   font-weight: 950;
 }
 
 .level-card span {
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(38, 31, 59, 0.58);
   font-size: 12px;
   font-weight: 800;
 }
@@ -219,7 +220,7 @@ h2 {
 .xp-bar {
   height: 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(123, 77, 255, 0.08);
   overflow: hidden;
 }
 
@@ -242,10 +243,10 @@ h2 {
 
 .badge-rack span {
   flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(123, 77, 255, 0.1);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.52);
+  background: #ffffff;
+  color: rgba(38, 31, 59, 0.52);
   padding: 7px 9px;
   font-size: 11px;
   font-weight: 900;
@@ -266,17 +267,17 @@ h2 {
 
 .battle-card {
   min-height: 190px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 28px;
+  border: 2px solid rgba(123, 77, 255, 0.12);
+  border-radius: 30px;
   background:
-    linear-gradient(160deg, rgba(151, 92, 255, 0.28), rgba(23, 27, 36, 0.94) 48%),
-    #171b24;
-  color: #fff;
+    linear-gradient(160deg, rgba(237, 229, 255, 0.98), rgba(255, 255, 255, 0.98) 58%),
+    #ffffff;
+  color: #261f3b;
   display: grid;
   align-content: center;
   justify-items: center;
   gap: 10px;
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 22px 44px rgba(123, 77, 255, 0.13);
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
@@ -285,8 +286,8 @@ h2 {
 
 .battle-card:nth-child(3) {
   background:
-    linear-gradient(160deg, rgba(39, 224, 178, 0.24), rgba(23, 27, 36, 0.94) 48%),
-    #171b24;
+    linear-gradient(160deg, rgba(220, 255, 247, 0.98), rgba(255, 255, 255, 0.98) 58%),
+    #ffffff;
 }
 
 .battle-card span {
@@ -295,7 +296,7 @@ h2 {
 }
 
 .battle-card small {
-  color: rgba(255, 255, 255, 0.56);
+  color: rgba(38, 31, 59, 0.5);
   font-size: 10px;
   font-weight: 950;
 }
@@ -303,7 +304,7 @@ h2 {
 .battle-card.selected {
   transform: translateY(-10px) scale(1.04);
   border-color: rgba(255, 209, 102, 0.66);
-  box-shadow: 0 0 34px rgba(255, 209, 102, 0.2), 0 26px 80px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 0 34px rgba(255, 209, 102, 0.28), 0 24px 48px rgba(123, 77, 255, 0.16);
 }
 
 .vs-badge {
@@ -313,7 +314,7 @@ h2 {
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, #ffd166, #975cff);
-  color: #0f1117;
+  color: #261f3b;
   font-weight: 950;
   box-shadow: 0 12px 28px rgba(151, 92, 255, 0.28);
 }
@@ -322,7 +323,7 @@ h2 {
   width: 100%;
   min-height: 62px;
   padding: 16px 18px;
-  color: #fff;
+  color: #261f3b;
   text-align: left;
   font-size: 18px;
   font-weight: 900;
@@ -342,7 +343,7 @@ h2 {
 
 .option-button.selected {
   border-color: rgba(151, 92, 255, 0.95);
-  background: linear-gradient(135deg, rgba(151, 92, 255, 0.28), rgba(39, 224, 178, 0.13));
+  background: linear-gradient(135deg, rgba(237, 229, 255, 0.98), rgba(220, 255, 247, 0.98));
   box-shadow: 0 0 28px rgba(151, 92, 255, 0.26), inset 0 0 24px rgba(255, 255, 255, 0.04);
 }
 
@@ -365,7 +366,7 @@ h2 {
 .secondary-button,
 .icon-button {
   border: 0;
-  border-radius: 22px;
+  border-radius: 999px;
   min-height: 58px;
   padding: 0 18px;
   font-weight: 950;
@@ -376,22 +377,22 @@ h2 {
 }
 
 .primary-button {
-  color: #09080c;
+  color: #261f3b;
   background: linear-gradient(135deg, #ffd166, #27e0b2 48%, #975cff);
   box-shadow: 0 16px 44px rgba(151, 92, 255, 0.28);
 }
 
 .secondary-button {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #261f3b;
+  background: #ffffff;
+  border: 2px solid rgba(123, 77, 255, 0.14);
 }
 
 .icon-button {
   min-height: 40px;
   border-radius: 999px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: #261f3b;
+  background: #ffffff;
 }
 
 .feedback {
@@ -416,14 +417,61 @@ h2 {
   gap: 10px;
 }
 
+.profile-card {
+  display: grid;
+  gap: 12px;
+  border: 2px solid rgba(123, 77, 255, 0.1);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 16px;
+  box-shadow: 0 18px 44px rgba(123, 77, 255, 0.12);
+}
+
+.profile-card label {
+  display: grid;
+  gap: 7px;
+  color: rgba(38, 31, 59, 0.72);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.gender-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cute-radio {
+  min-height: 46px;
+  display: grid !important;
+  place-items: center;
+  border: 2px solid rgba(123, 77, 255, 0.12);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #261f3b !important;
+  font-size: 13px !important;
+  box-shadow: inset 0 -3px 0 rgba(123, 77, 255, 0.05);
+}
+
+.cute-radio input {
+  position: absolute;
+  opacity: 0;
+}
+
+.cute-radio.checked,
+.cute-radio:has(input:checked) {
+  border-color: rgba(123, 77, 255, 0.44);
+  background: linear-gradient(135deg, #fff2bd, #e9fff9);
+}
+
 .text-input,
 .admin-input,
 .admin-textarea {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  border: 2px solid rgba(123, 77, 255, 0.12);
+  border-radius: 20px;
+  background: #ffffff;
+  color: #261f3b;
   outline: 0;
 }
 
@@ -476,7 +524,7 @@ h2 {
 }
 
 .ranking-card.rank-1 {
-  box-shadow: 0 0 28px rgba(255, 209, 102, 0.18), 0 18px 70px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 0 28px rgba(255, 209, 102, 0.24), 0 18px 44px rgba(123, 77, 255, 0.12);
 }
 
 .ranking-card.rank-2 {
@@ -493,7 +541,7 @@ h2 {
 }
 
 .pinned-school {
-  box-shadow: 0 0 0 3px rgba(216, 188, 114, 0.12), 0 18px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 0 0 3px rgba(216, 188, 114, 0.12), 0 18px 44px rgba(123, 77, 255, 0.12);
 }
 
 .rank-title {
@@ -508,9 +556,9 @@ h2 {
 }
 
 .rising-section {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(123, 77, 255, 0.1);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.94);
   padding: 12px;
   display: grid;
   gap: 8px;
@@ -527,20 +575,20 @@ h2 {
   grid-template-columns: 44px 1fr auto;
   gap: 8px;
   align-items: center;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(38, 31, 59, 0.7);
   font-size: 13px;
 }
 
 .rising-row strong,
 .rising-row em {
-  color: #fff;
+  color: #261f3b;
   font-style: normal;
   font-weight: 950;
 }
 
 .notice-card {
   padding: 14px;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(38, 31, 59, 0.7);
   font-size: 14px;
   line-height: 1.4;
 }
@@ -554,13 +602,13 @@ h2 {
 }
 
 .stat-label {
-  color: rgba(255, 255, 255, 0.56);
+  color: rgba(38, 31, 59, 0.54);
   font-size: 12px;
 }
 
 .stat-value {
   margin-top: 6px;
-  color: #fff;
+  color: #261f3b;
   font-size: 20px;
   font-weight: 950;
 }
@@ -578,8 +626,8 @@ h2 {
   overflow: hidden;
   border-radius: 30px;
   background:
-    linear-gradient(180deg, rgba(151, 92, 255, 0.22), transparent 42%),
-    #171b24;
+    linear-gradient(180deg, rgba(237, 229, 255, 0.98), transparent 48%),
+    #ffffff;
 }
 
 .swipe-card::before,
@@ -621,7 +669,7 @@ h2 {
 }
 
 .stock-stack span {
-  color: rgba(255, 255, 255, 0.54);
+  color: rgba(38, 31, 59, 0.54);
   font-size: 12px;
   font-weight: 900;
 }
@@ -630,15 +678,15 @@ h2 {
   width: fit-content;
   border-radius: 12px;
   padding: 7px 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(123, 77, 255, 0.08);
 }
 
 .pass-button {
-  color: rgba(255, 255, 255, 0.76);
+  color: rgba(38, 31, 59, 0.76);
 }
 
 .match-button {
-  color: #0f1117;
+  color: #261f3b;
 }
 
 .match-score {
@@ -646,7 +694,7 @@ h2 {
   border-radius: 999px;
   padding: 8px 11px;
   background: rgba(151, 92, 255, 0.18);
-  color: #ffd166;
+  color: #7b4dff;
   font-weight: 950;
 }
 
@@ -654,19 +702,19 @@ h2 {
   display: flex;
   justify-content: space-between;
   gap: 14px;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(38, 31, 59, 0.64);
   font-size: 14px;
 }
 
 .match-line strong {
-  color: #fff;
+  color: #261f3b;
 }
 
 .quiz-meta {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(38, 31, 59, 0.48);
   font-size: 11px;
 }
 
@@ -692,7 +740,7 @@ h2 {
 }
 
 .admin-school-row {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(123, 77, 255, 0.1);
   padding: 11px 0;
   display: grid;
   gap: 8px;
@@ -708,7 +756,7 @@ h2 {
 }
 
 .admin-school-row span {
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(38, 31, 59, 0.52);
   font-size: 11px;
 }
 
@@ -720,7 +768,7 @@ h2 {
 }
 
 .admin-school-row dt {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(38, 31, 59, 0.5);
   font-size: 10px;
 }
 
@@ -737,7 +785,7 @@ h2 {
   border-radius: 999px;
   padding: 3px 7px;
   background: rgba(151, 92, 255, 0.18);
-  color: #ffd166 !important;
+  color: #7b4dff !important;
   font-weight: 900;
 }
 
@@ -756,7 +804,7 @@ h2 {
   align-self: center;
   border: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(38, 31, 59, 0.48);
   font-size: 12px;
   text-decoration: underline;
 }

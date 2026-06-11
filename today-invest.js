@@ -18,7 +18,13 @@ const STORAGE_KEYS = {
   points: "todayInvestPoints",
   startAt: "todayInvestStartedAt",
   memberSchool: "memberSchool",
-  customSchools: "customSchoolStats",
+  memberName: "memberName",
+  memberGender: "memberGender",
+  memberPhone: "memberPhone",
+  profileCompleted: "hunterProfileCompleted",
+  profileRegisteredSchool: "hunterProfileRegisteredSchool",
+  schoolStats: "schoolStats",
+  todayParticipantKey: "schoolTodayParticipantDate",
   soundEnabled: "hunterQuestSoundEnabled",
 };
 
@@ -33,7 +39,6 @@ const state = {
   matchStep: 0,
   matchIndex: 0,
   interestedStocks: readJSON(STORAGE_KEYS.stocks, []),
-  showAllSchools: false,
 };
 
 const flowCards = ["⚔️ 오늘의 배틀", "🎯 오늘의 퀴즈", "🚀 오늘의 떡상픽", "🏆 대학 랭킹"];
@@ -122,6 +127,7 @@ function completedCount() {
 function addPoints(points) {
   const current = Number(localStorage.getItem(STORAGE_KEYS.points) || 0);
   save(STORAGE_KEYS.points, current + points);
+  addSchoolXP(points);
 }
 
 function getXP() {
@@ -175,7 +181,7 @@ function playSound(type = "tap") {
 }
 
 function getMemberSchool() {
-  return normalizeSchoolName(localStorage.getItem(STORAGE_KEYS.memberSchool) || "이화여자대학교");
+  return normalizeSchoolName(localStorage.getItem(STORAGE_KEYS.memberSchool) || "");
 }
 
 function saveMemberSchool(value) {
@@ -187,26 +193,61 @@ function saveMemberSchool(value) {
 }
 
 function ensureSchoolStat(school) {
-  if (schoolStats.some((item) => item.school === school)) return;
-  const customSchools = readJSON(STORAGE_KEYS.customSchools, []);
-  if (customSchools.some((item) => item.school === school)) return;
-  customSchools.push({
+  const stats = getSchoolStats();
+  if (stats.some((item) => item.school === school)) return;
+  stats.push({
     school,
-    totalPoints: 120,
-    memberCount: 1,
-    todayParticipants: 1,
-    totalParticipations: 1,
-    lastActiveAt: new Date().toISOString(),
-    weeklyPointGrowth: 120,
+    totalPoints: 10 + Math.floor(Math.random() * 991),
+    memberCount: 0,
+    todayParticipants: 0,
+    totalParticipations: 0,
+    lastActiveAt: "",
+    weeklyPointGrowth: 0,
     rankChange: 0,
     custom: true,
   });
-  save(STORAGE_KEYS.customSchools, customSchools);
+  save(STORAGE_KEYS.schoolStats, stats);
+}
+
+function getSchoolStats() {
+  const stored = readJSON(STORAGE_KEYS.schoolStats, null);
+  if (Array.isArray(stored) && stored.length) return stored;
+  const initialized = schoolStats.map((item) => ({
+    ...item,
+    totalPoints: 10 + Math.floor(Math.random() * 991),
+  }));
+  save(STORAGE_KEYS.schoolStats, initialized);
+  return initialized;
+}
+
+function updateSchoolStat(school, updater) {
+  const normalizedSchool = normalizeSchoolName(school);
+  ensureSchoolStat(normalizedSchool);
+  const nextStats = getSchoolStats().map((item) => (
+    item.school === normalizedSchool ? updater({ ...item }) : item
+  ));
+  save(STORAGE_KEYS.schoolStats, nextStats);
+}
+
+function addSchoolXP(points) {
+  const school = getMemberSchool();
+  if (!school) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const todayKey = `${today}:${school}`;
+  const alreadyCountedToday = localStorage.getItem(STORAGE_KEYS.todayParticipantKey) === todayKey;
+  updateSchoolStat(school, (item) => ({
+    ...item,
+    totalPoints: item.totalPoints + points,
+    todayParticipants: item.todayParticipants + (alreadyCountedToday ? 0 : 1),
+    totalParticipations: item.totalParticipations + 1,
+    weeklyPointGrowth: item.weeklyPointGrowth + points,
+    lastActiveAt: new Date().toISOString(),
+  }));
+  if (!alreadyCountedToday) save(STORAGE_KEYS.todayParticipantKey, todayKey);
 }
 
 function getRankedSchools() {
-  const merged = [...schoolStats, ...readJSON(STORAGE_KEYS.customSchools, [])];
-  return merged
+  return getSchoolStats()
     .map((item) => ({ ...item, school: normalizeSchoolName(item.school) }))
     .sort((a, b) => b.totalPoints - a.totalPoints);
 }
@@ -214,8 +255,8 @@ function getRankedSchools() {
 function getRisingSchools() {
   return [...getRankedSchools()]
     .sort((a, b) => {
-      const aScore = a.weeklyPointGrowth + a.todayParticipants * 45 + Math.max(0, a.memberCount) * 4;
-      const bScore = b.weeklyPointGrowth + b.todayParticipants * 45 + Math.max(0, b.memberCount) * 4;
+      const aScore = a.weeklyPointGrowth + a.todayParticipants * 20 + Math.max(0, a.memberCount) * 2;
+      const bScore = b.weeklyPointGrowth + b.todayParticipants * 20 + Math.max(0, b.memberCount) * 2;
       return bScore - aScore;
     })
     .slice(0, 3);
@@ -223,6 +264,43 @@ function getRisingSchools() {
 
 function rankOfSchool(school, rankedSchools) {
   return rankedSchools.findIndex((item) => item.school === school) + 1;
+}
+
+function isProfileComplete() {
+  return localStorage.getItem(STORAGE_KEYS.profileCompleted) === "true";
+}
+
+function getProfile() {
+  return {
+    name: localStorage.getItem(STORAGE_KEYS.memberName) || "",
+    school: getMemberSchool(),
+    gender: localStorage.getItem(STORAGE_KEYS.memberGender) || "",
+    phone: localStorage.getItem(STORAGE_KEYS.memberPhone) || "",
+  };
+}
+
+function saveProfile(profile) {
+  const school = saveMemberSchool(String(profile.school || ""));
+  save(STORAGE_KEYS.memberName, String(profile.name || "").trim());
+  save(STORAGE_KEYS.memberGender, String(profile.gender || "").trim());
+  save(STORAGE_KEYS.memberPhone, String(profile.phone || "").trim());
+  save(STORAGE_KEYS.profileCompleted, "true");
+
+  const registeredSchool = localStorage.getItem(STORAGE_KEYS.profileRegisteredSchool);
+  if (registeredSchool !== school) {
+    if (registeredSchool) {
+      updateSchoolStat(registeredSchool, (item) => ({
+        ...item,
+        memberCount: Math.max(0, item.memberCount - 1),
+      }));
+    }
+    updateSchoolStat(school, (item) => ({
+      ...item,
+      memberCount: item.memberCount + 1,
+      lastActiveAt: new Date().toISOString(),
+    }));
+    save(STORAGE_KEYS.profileRegisteredSchool, school);
+  }
 }
 
 function getRankMedal(rank) {
@@ -295,12 +373,61 @@ function render() {
 }
 
 function renderToday() {
+  if (!isProfileComplete()) return renderProfile();
   if (state.todayStep === 1) return renderBattle();
   if (state.todayStep === 2) return renderQuiz();
   if (state.todayStep === 3) return renderPick();
   if (state.todayStep === 4) return renderRanking();
   if (state.todayStep === 5 || isComplete()) return renderComplete();
   renderHome();
+}
+
+function renderProfile() {
+  const profile = getProfile();
+  screen(`
+    ${topbar("PROFILE")}
+    <div class="hero">
+      <div class="eyebrow">🎮 HUNTER START</div>
+      <h1>JOIN<br />QUEST</h1>
+      <p class="subtitle">처음 한 번만 헌터 정보를 입력하면 학교 랭킹에 XP가 실제로 반영됩니다.</p>
+    </div>
+    <form class="profile-card" data-form="profile">
+      <label>
+        이름
+        <input class="text-input" name="name" value="${escapeAttribute(profile.name)}" placeholder="홍길동" required />
+      </label>
+      <label>
+        학교
+        <input class="text-input" name="school" value="${escapeAttribute(profile.school)}" placeholder="예: 이대, 서울대, 가천대" required />
+      </label>
+      <div class="gender-grid">
+        ${["여성", "남성", "기타"].map((gender) => `
+          <label class="cute-radio ${profile.gender === gender ? "checked" : ""}">
+            <input type="radio" name="gender" value="${gender}" ${profile.gender === gender ? "checked" : ""} required />
+            ${gender}
+          </label>
+        `).join("")}
+      </div>
+      <label>
+        번호
+        <input class="text-input" name="phone" value="${escapeAttribute(profile.phone)}" placeholder="010-0000-0000" inputmode="tel" required />
+      </label>
+      <button class="primary-button">퀘스트 입장</button>
+    </form>
+  `, "profile-screen");
+  bindGlobalHud();
+  bind("[data-form='profile']", (event) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    saveProfile({
+      name: form.get("name"),
+      school: form.get("school"),
+      gender: form.get("gender"),
+      phone: form.get("phone"),
+    });
+    playSound("match");
+    renderHome();
+  }, "submit");
 }
 
 function renderHome() {
@@ -450,21 +577,15 @@ function renderRanking() {
   const rankedSchools = getRankedSchools();
   const memberSchool = getMemberSchool();
   ensureSchoolStat(memberSchool);
-  const currentRank = rankOfSchool(memberSchool, rankedSchools);
-  const currentSchool = rankedSchools.find((item) => item.school === memberSchool);
-  const topSchools = state.showAllSchools ? rankedSchools : rankedSchools.slice(0, 10);
-  const shouldShowCurrent = currentSchool && currentRank > 10 && !state.showAllSchools;
+  const topSchools = rankedSchools.slice(0, 10);
   const risingSchools = getRisingSchools();
   screen(`
     ${topbar("4 / 5")}
     <div class="hero">
-      <div class="eyebrow">🏆 GUILD RANKING</div>
-      <h2>TOP 10 HUNTER SCHOOL</h2>
+      <div class="eyebrow">🏆 SCHOOL RANKING</div>
+      <h2>TOP 10 학교 랭킹</h2>
+      <p class="subtitle">내 학교: ${escapeHTML(memberSchool)}</p>
     </div>
-    <form class="school-form" data-form="member-school">
-      <input class="text-input school-input" name="school" value="${escapeAttribute(memberSchool)}" placeholder="내 학교 입력" />
-      <button class="secondary-button school-save">저장</button>
-    </form>
     <div class="ranking-list compact-rankings">
       ${topSchools.map((rank) => {
         const realRank = rankOfSchool(rank.school, rankedSchools);
@@ -477,17 +598,7 @@ function renderRanking() {
           <div class="rank-points">${rank.totalPoints.toLocaleString()} XP</div>
         </div>
       `}).join("")}
-      ${shouldShowCurrent ? `
-        <div class="ranking-card current pinned-school">
-          <div>
-            <div class="rank-title">${currentRank}위 ${currentSchool.school}</div>
-            <div class="muted">내 학교는 TOP 10 밖이어도 표시됩니다</div>
-          </div>
-          <div class="rank-points">${currentSchool.totalPoints.toLocaleString()} XP</div>
-        </div>
-      ` : ""}
     </div>
-    <button class="footer-link" data-action="toggle-schools">${state.showAllSchools ? "TOP 10만 보기" : "전체 학교 보기"}</button>
     <div class="rising-section">
       <div class="section-title">🔥 HOT UNIVERSITY</div>
       ${risingSchools.map((school) => `
@@ -505,16 +616,6 @@ function renderRanking() {
     const button = document.querySelector("[data-action='finish']");
     if (button) button.style.opacity = "1";
   }, 1200);
-  bind("[data-form='member-school']", (event) => {
-    event.preventDefault();
-    const school = new FormData(event.currentTarget).get("school");
-    saveMemberSchool(school);
-    renderRanking();
-  }, "submit");
-  bind("[data-action='toggle-schools']", () => {
-    state.showAllSchools = !state.showAllSchools;
-    renderRanking();
-  });
   bind("[data-action='finish']", () => {
     playSound("correct");
     save(STORAGE_KEYS.rankingViewed, "true");
@@ -532,6 +633,10 @@ function renderRanking() {
 function renderComplete() {
   const elapsed = localStorage.getItem(STORAGE_KEYS.elapsedTime) || "20";
   const level = getLevelInfo();
+  const rankedSchools = getRankedSchools();
+  const todayHunters = rankedSchools.reduce((sum, school) => sum + school.todayParticipants, 0);
+  const memberSchool = getMemberSchool();
+  const memberSchoolStat = rankedSchools.find((school) => school.school === memberSchool);
   screen(`
     ${topbar("5 / 5 완료")}
     <div class="hero">
@@ -541,9 +646,9 @@ function renderComplete() {
     </div>
     <div class="result-grid">
       <div class="stat-card"><div class="stat-label">소요시간</div><div class="stat-value">${elapsed}초</div></div>
-      <div class="stat-card"><div class="stat-label">오늘 HUNTER</div><div class="stat-value">1,284명</div></div>
+      <div class="stat-card"><div class="stat-label">오늘 HUNTER</div><div class="stat-value">${todayHunters}명</div></div>
       <div class="stat-card"><div class="stat-label">TOTAL XP</div><div class="stat-value">${level.xp.toLocaleString()} XP</div></div>
-      <div class="stat-card"><div class="stat-label">LEVEL</div><div class="stat-value">${level.level}</div></div>
+      <div class="stat-card"><div class="stat-label">학교 XP</div><div class="stat-value">${(memberSchoolStat?.totalPoints || 0).toLocaleString()} XP</div></div>
     </div>
     <div class="badge-rack expanded">
       ${badges.map((badge, index) => `<span class="${index < completedCount() ? "earned" : ""}">${badge}</span>`).join("")}
@@ -726,8 +831,8 @@ function renderAdmin() {
       <button class="primary-button">저장</button>
     </form>
     <div class="admin-panel admin-ranking">
-      <h3>전체 학교 랭킹</h3>
-      ${rankedSchools.map((school, index) => `
+      <h3>학교 랭킹 TOP 10</h3>
+      ${rankedSchools.slice(0, 10).map((school, index) => `
         <div class="admin-school-row">
           <div>
             <strong>${index + 1}위 ${school.school}</strong>
