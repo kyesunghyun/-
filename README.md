@@ -1,6 +1,6 @@
-# The Hunters TODAY INVEST
+# The Hunters TODAY QUEST
 
-정적 웹앱으로 구현된 `TODAY INVEST + Hunter Match` 초기 버전입니다.
+정적 웹앱으로 구현된 `TODAY QUEST + Hunter Match` 초기 버전입니다.
 
 ## 실행
 
@@ -8,7 +8,7 @@
 python3 -m http.server 4173
 ```
 
-- TODAY INVEST: http://127.0.0.1:4173/today/
+- TODAY QUEST: http://127.0.0.1:4173/today/
 - Hunter Match: http://127.0.0.1:4173/match/
 - 퀴즈 관리자: http://127.0.0.1:4173/admin/
 
@@ -24,4 +24,4 @@ python3 -m http.server 4173
 - OpenDART 또는 KRX 기반 최신 데이터 수집
 - API 키는 서버 환경변수로만 보관
 - 관리자 퀴즈 저장을 localStorage에서 DB 또는 CMS로 이전
-- TODAY INVEST 참여 기록과 Hunter Match 프로필을 회원 DB에 연결
+- TODAY QUEST 참여 기록과 Hunter Match 프로필을 회원 DB에 연결

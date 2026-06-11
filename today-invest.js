@@ -19,6 +19,7 @@ const STORAGE_KEYS = {
   startAt: "todayInvestStartedAt",
   memberSchool: "memberSchool",
   customSchools: "customSchoolStats",
+  soundEnabled: "hunterQuestSoundEnabled",
 };
 
 const app = document.querySelector("#app");
@@ -36,6 +37,14 @@ const state = {
 };
 
 const flowCards = ["⚔️ 오늘의 배틀", "🎯 오늘의 퀴즈", "🚀 오늘의 떡상픽", "🏆 대학 랭킹"];
+const investorTypes = [
+  "🦅 Growth Hunter",
+  "🐢 Value Keeper",
+  "🦈 Momentum Trader",
+  "🧠 Quant Thinker",
+  "💰 Dividend Collector",
+];
+const badges = ["첫 퀘스트 완료", "기업분석가", "모의투자 참가자", "상위 10% 예언가", "학교 대표 헌터"];
 const matches = [
   {
     score: 92,
@@ -115,6 +124,56 @@ function addPoints(points) {
   save(STORAGE_KEYS.points, current + points);
 }
 
+function getXP() {
+  return Number(localStorage.getItem(STORAGE_KEYS.points) || 0);
+}
+
+function getLevelInfo() {
+  const xp = getXP();
+  const level = Math.max(1, Math.floor(xp / 250) + 1);
+  const currentLevelXP = (level - 1) * 250;
+  const nextLevelXP = level * 250;
+  return {
+    xp,
+    level,
+    nextXP: nextLevelXP - xp,
+    progress: Math.min(100, Math.round(((xp - currentLevelXP) / 250) * 100)),
+  };
+}
+
+function getQuestProgressBlocks(count = completedCount()) {
+  return Array.from({ length: 5 }, (_, index) => `<span class="${index < count ? "filled" : ""}"></span>`).join("");
+}
+
+function isSoundEnabled() {
+  return localStorage.getItem(STORAGE_KEYS.soundEnabled) !== "false";
+}
+
+function playSound(type = "tap") {
+  if (!isSoundEnabled()) return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const context = new AudioContext();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const frequencies = {
+      tap: 520,
+      battle: 180,
+      correct: 880,
+      match: 720,
+    };
+    oscillator.frequency.value = frequencies[type] || frequencies.tap;
+    oscillator.type = type === "battle" ? "square" : "sine";
+    gain.gain.setValueAtTime(0.04, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.12);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + 0.13);
+  } catch {
+    // Sound is optional; unsupported browsers should continue silently.
+  }
+}
+
 function getMemberSchool() {
   return normalizeSchoolName(localStorage.getItem(STORAGE_KEYS.memberSchool) || "이화여자대학교");
 }
@@ -166,6 +225,13 @@ function rankOfSchool(school, rankedSchools) {
   return rankedSchools.findIndex((item) => item.school === school) + 1;
 }
 
+function getRankMedal(rank) {
+  if (rank === 1) return "🏆 GOLD";
+  if (rank === 2) return "🥈 SILVER";
+  if (rank === 3) return "🥉 BRONZE";
+  return "🎖️";
+}
+
 async function getTodayQuiz() {
   try {
     const response = await fetch("/api/today-quiz", { headers: { accept: "application/json" } });
@@ -202,12 +268,24 @@ function screen(content, className = "") {
 }
 
 function topbar(progress = `${completedCount()} / 4`) {
+  const level = getLevelInfo();
   return `
     <div class="topbar">
-      <div class="brand">THE HUNTERS</div>
+      <div>
+        <div class="brand">THE HUNTERS INVEST QUEST</div>
+        <div class="hunter-level">LEVEL ${level.level} · ${level.xp.toLocaleString()} XP</div>
+      </div>
+      <button class="sound-toggle" data-action="toggle-sound">${isSoundEnabled() ? "🔊" : "🔇"}</button>
       <div class="progress-pill">${progress}</div>
     </div>
   `;
+}
+
+function bindGlobalHud() {
+  bind("[data-action='toggle-sound']", () => {
+    save(STORAGE_KEYS.soundEnabled, isSoundEnabled() ? "false" : "true");
+    render();
+  });
 }
 
 function render() {
@@ -227,22 +305,33 @@ function renderToday() {
 
 function renderHome() {
   const count = completedCount();
+  const level = getLevelInfo();
   screen(`
-    ${topbar(`${count} / 4`)}
+    ${topbar(`${count} / 5 완료`)}
     <div class="hero">
-      <div class="eyebrow">TODAY INVEST</div>
-      <h1>TODAY<br />INVEST</h1>
-      <p class="subtitle">20초 안에 오늘의 투자 감각을 남기고 포인트를 받으세요.</p>
+      <div class="eyebrow">⚔️ DAILY QUEST</div>
+      <h1>TODAY<br />QUEST</h1>
+      <div class="quest-blocks">${getQuestProgressBlocks(count)}</div>
+      <p class="subtitle">HUNTER, 오늘의 퀘스트를 클리어하고 XP를 획득하세요.</p>
+    </div>
+    <div class="level-card">
+      <div><strong>LEVEL ${level.level}</strong><span>다음 레벨까지 ${level.nextXP} XP</span></div>
+      <div class="xp-bar"><span style="width:${level.progress}%"></span></div>
     </div>
     <div class="card-grid">
-      ${flowCards.map((item, index) => `<div class="feature-card ${index < count ? "done" : ""}"><span>${item}</span><span>${index < count ? "완료" : ""}</span></div>`).join("")}
+      ${flowCards.map((item, index) => `<div class="feature-card quest-card ${index < count ? "done" : ""}"><span>${item}</span><span>${index < count ? "CLEAR" : "READY"}</span></div>`).join("")}
+    </div>
+    <div class="badge-rack">
+      ${badges.slice(0, 3).map((badge, index) => `<span class="${index < count ? "earned" : ""}">${badge}</span>`).join("")}
     </div>
     <div class="card-grid">
-      <button class="primary-button" data-action="start">오늘의 투자 시작</button>
+      <button class="primary-button" data-action="start">퀘스트 시작</button>
       <button class="footer-link" data-action="admin">오늘의 퀴즈 수정</button>
     </div>
-  `);
+  `, "quest-screen");
+  bindGlobalHud();
   bind("[data-action='start']", () => {
+    playSound("tap");
     save(STORAGE_KEYS.startAt, Date.now());
     state.todayStep = 1;
     render();
@@ -252,22 +341,26 @@ function renderHome() {
 
 function renderBattle() {
   screen(`
-    ${topbar("0 / 4")}
+    ${topbar("1 / 5")}
     <div class="hero">
-      <div class="eyebrow">오늘의 배틀</div>
-      <h2>오늘 더 강할 종목은?</h2>
+      <div class="eyebrow">⚔️ BATTLE QUEST</div>
+      <h2>오늘 더 강할 헌터 카드는?</h2>
     </div>
-    <div class="option-list">
-      ${["삼성전자", "SK하이닉스"].map((item) => `<button class="option-button" data-choice="${item}">${item}</button>`).join("")}
+    <div class="battle-arena">
+      <button class="battle-card" data-choice="삼성전자"><span>삼성전자</span><small>POWER CARD</small></button>
+      <div class="vs-badge">VS</div>
+      <button class="battle-card" data-choice="SK하이닉스"><span>SK하이닉스</span><small>POWER CARD</small></button>
     </div>
     <div class="feedback ${state.feedback ? "show" : ""}">${state.feedback}</div>
-  `);
+  `, "quest-screen");
+  bindGlobalHud();
   bindAll("[data-choice]", (button) => {
+    playSound("battle");
     selectAndNext(button, () => {
       save(STORAGE_KEYS.battle, button.dataset.choice);
       addPoints(5);
       state.todayStep = 2;
-    }, "참여 +5P");
+    }, "+5 XP");
   });
 }
 
@@ -275,9 +368,9 @@ async function renderQuiz() {
   if (!state.quiz) state.quiz = await getTodayQuiz();
   const quiz = state.quiz;
   screen(`
-    ${topbar("1 / 4")}
+    ${topbar("2 / 5")}
     <div class="hero">
-      <div class="eyebrow">오늘의 퀴즈</div>
+      <div class="eyebrow">🎯 QUIZ QUEST</div>
       <h2>${escapeHTML(quiz.question)}</h2>
     </div>
     <div class="option-list">
@@ -288,25 +381,28 @@ async function renderQuiz() {
       <span>업데이트: ${formatUpdatedAt(quiz.updatedAt)}</span>
       <span class="${isQuizStale(quiz) ? "stale" : ""}">${isQuizStale(quiz) ? "업데이트 필요" : quiz.source}</span>
     </div>
-  `);
+  `, "quest-screen");
+  bindGlobalHud();
   bindAll("[data-choice]", (button) => {
     const answer = button.dataset.choice;
     const correct = answer === quiz.answer;
+    playSound(correct ? "correct" : "tap");
+    if (correct) burstConfetti();
     selectAndNext(button, () => {
       save(STORAGE_KEYS.quizAnswer, answer);
       save(STORAGE_KEYS.quizCorrect, correct);
       addPoints(correct ? 10 : 3);
       state.todayStep = 3;
-    }, correct ? "정답 +10P" : "아쉽다");
+    }, correct ? "정답 +10 XP" : "+3 XP");
   });
 }
 
 function renderPick() {
   screen(`
-    ${topbar("2 / 4")}
+    ${topbar("3 / 5")}
     <div class="hero">
-      <div class="eyebrow">오늘의 떡상픽</div>
-      <h2>다음 주 가장 기대되는 종목은?</h2>
+      <div class="eyebrow">🚀 PROPHECY QUEST</div>
+      <h2>이번 주 떡상 예언</h2>
     </div>
     <div class="option-list">
       ${["엔비디아", "테슬라", "삼성전자"].map((item) => `<button class="option-button" data-choice="${item}">${item}</button>`).join("")}
@@ -314,13 +410,15 @@ function renderPick() {
     </div>
     <div id="customPick"></div>
     <div class="feedback ${state.feedback ? "show" : ""}">${state.feedback}</div>
-  `);
+  `, "quest-screen");
+  bindGlobalHud();
   bindAll("[data-choice]", (button) => {
+    playSound("tap");
     selectAndNext(button, () => {
       save(STORAGE_KEYS.pick, button.dataset.choice);
       addPoints(5);
       state.todayStep = 4;
-    }, "픽 저장 +5P");
+    }, "예언 완료 +5 XP");
   });
   bind("[data-action='custom-pick']", () => {
     document.querySelector("#customPick").innerHTML = `
@@ -336,7 +434,8 @@ function renderPick() {
       if (!value) return;
       save(STORAGE_KEYS.pick, value);
       addPoints(5);
-      state.feedback = "픽 저장 +5P";
+      playSound("tap");
+      state.feedback = "예언 완료 +5 XP";
       render();
       window.setTimeout(() => {
         state.feedback = "";
@@ -357,10 +456,10 @@ function renderRanking() {
   const shouldShowCurrent = currentSchool && currentRank > 10 && !state.showAllSchools;
   const risingSchools = getRisingSchools();
   screen(`
-    ${topbar("3 / 4")}
+    ${topbar("4 / 5")}
     <div class="hero">
-      <div class="eyebrow">대학 랭킹</div>
-      <h2>TOP 10 학교 투자 랭킹</h2>
+      <div class="eyebrow">🏆 GUILD RANKING</div>
+      <h2>TOP 10 HUNTER SCHOOL</h2>
     </div>
     <form class="school-form" data-form="member-school">
       <input class="text-input school-input" name="school" value="${escapeAttribute(memberSchool)}" placeholder="내 학교 입력" />
@@ -370,12 +469,12 @@ function renderRanking() {
       ${topSchools.map((rank) => {
         const realRank = rankOfSchool(rank.school, rankedSchools);
         return `
-        <div class="ranking-card ${rank.school === memberSchool ? "current" : ""} ${realRank <= 3 ? "podium" : ""}">
+        <div class="ranking-card ${rank.school === memberSchool ? "current" : ""} ${realRank <= 3 ? "podium rank-${realRank}" : ""}">
           <div>
-            <div class="rank-title">${realRank}위 ${rank.school}</div>
+            <div class="rank-title">${getRankMedal(realRank)} ${realRank}위 ${rank.school}</div>
             ${rank.school === memberSchool ? `<div class="muted">내 학교, 오늘 참여자 ${rank.todayParticipants}명</div>` : ""}
           </div>
-          <div class="rank-points">${rank.totalPoints.toLocaleString()}P</div>
+          <div class="rank-points">${rank.totalPoints.toLocaleString()} XP</div>
         </div>
       `}).join("")}
       ${shouldShowCurrent ? `
@@ -384,23 +483,24 @@ function renderRanking() {
             <div class="rank-title">${currentRank}위 ${currentSchool.school}</div>
             <div class="muted">내 학교는 TOP 10 밖이어도 표시됩니다</div>
           </div>
-          <div class="rank-points">${currentSchool.totalPoints.toLocaleString()}P</div>
+          <div class="rank-points">${currentSchool.totalPoints.toLocaleString()} XP</div>
         </div>
       ` : ""}
     </div>
     <button class="footer-link" data-action="toggle-schools">${state.showAllSchools ? "TOP 10만 보기" : "전체 학교 보기"}</button>
     <div class="rising-section">
-      <div class="section-title">🔥 이번 주 급상승</div>
+      <div class="section-title">🔥 HOT UNIVERSITY</div>
       ${risingSchools.map((school) => `
         <div class="rising-row">
           <strong>+${school.rankChange}위</strong>
           <span>${school.school}</span>
-          <em>+${school.weeklyPointGrowth.toLocaleString()}P</em>
+          <em>+${school.weeklyPointGrowth.toLocaleString()} XP</em>
         </div>
       `).join("")}
     </div>
-    <button class="primary-button" data-action="finish">완료하기</button>
+    <button class="primary-button" data-action="finish">퀘스트 완료</button>
   `, "ranking-screen");
+  bindGlobalHud();
   window.setTimeout(() => {
     const button = document.querySelector("[data-action='finish']");
     if (button) button.style.opacity = "1";
@@ -416,6 +516,7 @@ function renderRanking() {
     renderRanking();
   });
   bind("[data-action='finish']", () => {
+    playSound("correct");
     save(STORAGE_KEYS.rankingViewed, "true");
     addPoints(2);
     addPoints(10);
@@ -430,26 +531,33 @@ function renderRanking() {
 
 function renderComplete() {
   const elapsed = localStorage.getItem(STORAGE_KEYS.elapsedTime) || "20";
-  const points = localStorage.getItem(STORAGE_KEYS.points) || "0";
+  const level = getLevelInfo();
   screen(`
-    ${topbar("4 / 4")}
+    ${topbar("5 / 5 완료")}
     <div class="hero">
-      <div class="eyebrow">COMPLETE</div>
-      <h2>오늘의 투자 완료</h2>
-      <p class="subtitle">Hunter Match에서 투자 친구까지 바로 찾아보세요.</p>
+      <div class="eyebrow">QUEST CLEAR</div>
+      <h2>오늘의 퀘스트 완료</h2>
+      <p class="subtitle">HUNTER MATCH에서 다음 파티원을 찾아보세요.</p>
     </div>
     <div class="result-grid">
       <div class="stat-card"><div class="stat-label">소요시간</div><div class="stat-value">${elapsed}초</div></div>
-      <div class="stat-card"><div class="stat-label">오늘 참여자</div><div class="stat-value">1,284명</div></div>
-      <div class="stat-card"><div class="stat-label">획득 포인트</div><div class="stat-value">+${points}P</div></div>
-      <div class="stat-card"><div class="stat-label">학교 기여</div><div class="stat-value">+32P</div></div>
+      <div class="stat-card"><div class="stat-label">오늘 HUNTER</div><div class="stat-value">1,284명</div></div>
+      <div class="stat-card"><div class="stat-label">TOTAL XP</div><div class="stat-value">${level.xp.toLocaleString()} XP</div></div>
+      <div class="stat-card"><div class="stat-label">LEVEL</div><div class="stat-value">${level.level}</div></div>
+    </div>
+    <div class="badge-rack expanded">
+      ${badges.map((badge, index) => `<span class="${index < completedCount() ? "earned" : ""}">${badge}</span>`).join("")}
     </div>
     <div class="button-row">
-      <button class="primary-button" data-action="match">투자 친구 찾기</button>
+      <button class="primary-button" data-action="match">HUNTER MATCH</button>
       <button class="secondary-button" data-action="exit">종료</button>
     </div>
-  `);
-  bind("[data-action='match']", () => navigate("match"));
+  `, "quest-screen");
+  bindGlobalHud();
+  bind("[data-action='match']", () => {
+    playSound("match");
+    navigate("match");
+  });
   bind("[data-action='exit']", () => {
     state.todayStep = 0;
     renderHome();
@@ -468,13 +576,15 @@ function renderPurpose() {
     ${topbar("Hunter Match")}
     <div class="hero">
       <div class="eyebrow">HUNTER MATCH</div>
-      <h2>어떤 투자 친구를 찾고 있나?</h2>
+      <h2>어떤 파티원을 찾고 있나?</h2>
     </div>
     <div class="option-list">
       ${["투자 친구", "스터디 팀원", "취준 동료", "기업분석 파트너"].map((item) => `<button class="option-button" data-choice="${item}">${item}</button>`).join("")}
     </div>
-  `);
+  `, "match-screen quest-screen");
+  bindGlobalHud();
   bindAll("[data-choice]", (button) => {
+    playSound("tap");
     selectAndNext(button, () => {
       save(STORAGE_KEYS.purpose, button.dataset.choice);
       state.matchStep = 1;
@@ -486,14 +596,16 @@ function renderStyle() {
   screen(`
     ${topbar("Hunter Match")}
     <div class="hero">
-      <div class="eyebrow">투자 성향</div>
-      <h2>투자 성향은?</h2>
+      <div class="eyebrow">INVESTOR TYPE</div>
+      <h2>너의 헌터 타입은?</h2>
     </div>
     <div class="option-list">
-      ${["가치투자", "성장주", "ETF", "배당", "단타", "퀀트", "아직 모름"].map((item) => `<button class="option-button compact" data-choice="${item}">${item}</button>`).join("")}
+      ${investorTypes.map((item) => `<button class="option-button compact type-card" data-choice="${item}">${item}</button>`).join("")}
     </div>
-  `);
+  `, "match-screen quest-screen");
+  bindGlobalHud();
   bindAll("[data-choice]", (button) => {
+    playSound("tap");
     selectAndNext(button, () => {
       save(STORAGE_KEYS.style, button.dataset.choice);
       state.matchStep = 2;
@@ -506,15 +618,16 @@ function renderStocks() {
   screen(`
     ${topbar(`${state.interestedStocks.length} / 3`)}
     <div class="hero">
-      <div class="eyebrow">관심 종목</div>
-      <h2>관심 종목 3개를 골라줘</h2>
+      <div class="eyebrow">ITEM DECK</div>
+      <h2>관심 종목 카드 3개 선택</h2>
     </div>
     <div class="option-list">
       ${stocks.map((item) => `<button class="option-button compact ${state.interestedStocks.includes(item) ? "selected" : ""}" data-stock="${item}">${item}</button>`).join("")}
       <button class="option-button compact" data-action="custom-stock">직접 입력</button>
     </div>
     <div id="customStock"></div>
-  `);
+  `, "match-screen quest-screen");
+  bindGlobalHud();
   bindAll("[data-stock]", (button) => toggleStock(button.dataset.stock));
   bind("[data-action='custom-stock']", () => {
     document.querySelector("#customStock").innerHTML = `
@@ -532,12 +645,14 @@ function renderStocks() {
 }
 
 function toggleStock(stock) {
+  playSound("tap");
   const exists = state.interestedStocks.includes(stock);
   if (exists) state.interestedStocks = state.interestedStocks.filter((item) => item !== stock);
   else if (state.interestedStocks.length < 3) state.interestedStocks = [...state.interestedStocks, stock];
   save(STORAGE_KEYS.stocks, state.interestedStocks);
   if (state.interestedStocks.length === 3) {
     addPoints(20);
+    playSound("match");
     window.setTimeout(() => {
       state.matchStep = 3;
       render();
@@ -553,27 +668,33 @@ function renderMatchResult() {
   screen(`
     ${topbar("Match Result")}
     <div class="hero">
-      <div class="eyebrow">추천 매칭</div>
-      <h2>잘 맞는 헌터를 찾았어요</h2>
+      <div class="eyebrow">MATCH CARD</div>
+      <h2>헌터 카드 발견</h2>
     </div>
-    <div class="match-card">
-      <div class="match-score">${match.score}% 일치</div>
-      <div class="match-line"><span>학교</span><strong>${match.university}</strong></div>
-      <div class="match-line"><span>성향</span><strong>${match.style}</strong></div>
-      <div class="match-line"><span>관심종목</span><strong>${match.stocks.join(", ")}</strong></div>
+    <div class="match-card swipe-card">
+      <div class="match-score">🎯 ${match.score}% MATCH</div>
+      <h3>${normalizeSchoolName(match.university)}</h3>
+      <div class="type-chip">${localStorage.getItem(STORAGE_KEYS.style) || match.style}</div>
+      <div class="stock-stack">
+        <span>관심종목</span>
+        ${match.stocks.slice(0, 3).map((stock) => `<strong>${stock}</strong>`).join("")}
+      </div>
       <div class="match-line"><span>목표</span><strong>${match.goal}</strong></div>
     </div>
-    <div class="notice-card">${sent ? "신청이 전달되었습니다" : "대화 신청을 보내거나 다음 사람을 볼 수 있어요."}</div>
+    <div class="notice-card">${sent ? "신청이 전달되었습니다" : "카드를 넘기거나 MATCH를 보내세요."}</div>
     <div class="button-row">
-      <button class="primary-button" data-action="send">대화 신청</button>
-      <button class="secondary-button" data-action="next">다음 사람 보기</button>
+      <button class="secondary-button pass-button" data-action="next">PASS</button>
+      <button class="primary-button match-button" data-action="send">MATCH</button>
     </div>
-  `);
+  `, "match-screen quest-screen");
+  bindGlobalHud();
   bind("[data-action='send']", () => {
+    playSound("match");
     save(STORAGE_KEYS.requestSent, "true");
     renderMatchResult();
   });
   bind("[data-action='next']", () => {
+    playSound("tap");
     state.matchIndex += 1;
     save(STORAGE_KEYS.requestSent, "false");
     renderMatchResult();
@@ -615,15 +736,16 @@ function renderAdmin() {
           </div>
           <dl>
             <dt>회원</dt><dd>${school.memberCount}명</dd>
-            <dt>총점</dt><dd>${school.totalPoints.toLocaleString()}P</dd>
+            <dt>총점</dt><dd>${school.totalPoints.toLocaleString()} XP</dd>
             <dt>오늘</dt><dd>${school.todayParticipants}명</dd>
             <dt>누적</dt><dd>${school.totalParticipations}회</dd>
           </dl>
         </div>
       `).join("")}
     </div>
-    <button class="secondary-button" data-action="today">TODAY INVEST로</button>
+    <button class="secondary-button" data-action="today">TODAY QUEST로</button>
   `);
+  bindGlobalHud();
   bind("[data-form='admin-quiz']", (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -646,6 +768,7 @@ function renderAdmin() {
 
 function selectAndNext(button, commit, message) {
   button.classList.add("selected");
+  button.classList.add("pop-selected");
   state.feedback = message;
   const feedback = document.querySelector(".feedback");
   if (feedback) {
@@ -657,6 +780,14 @@ function selectAndNext(button, commit, message) {
     commit();
     render();
   }, 300);
+}
+
+function burstConfetti() {
+  const confetti = document.createElement("div");
+  confetti.className = "confetti-burst";
+  confetti.innerHTML = Array.from({ length: 14 }, (_, index) => `<i style="--i:${index}"></i>`).join("");
+  document.body.appendChild(confetti);
+  window.setTimeout(() => confetti.remove(), 700);
 }
 
 function bind(selector, handler, event = "click") {
